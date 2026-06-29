@@ -1,0 +1,251 @@
+{
+  "scanId": "demo-event-stream-2018",
+  "repoUrl": "https://github.com/dominictarr/event-stream",
+  "status": "completed",
+  "threatScore": 96,
+  "depchain": {
+    "nodes": [
+      {
+        "id": "event-stream@root",
+        "name": "event-stream",
+        "version": "3.3.6",
+        "isRoot": true,
+        "cves": [],
+        "ecosystem": "npm"
+      },
+      {
+        "id": "flatmap-stream@0.1.1",
+        "name": "flatmap-stream",
+        "version": "0.1.1",
+        "isDirect": true,
+        "cves": [
+          {
+            "id": "GHSA-vx3p-cxjq-v8gg",
+            "severity": "critical",
+            "score": 9.8,
+            "summary": "Malicious code injected by new maintainer right9ctrl. Contained an encrypted payload that stole Bitcoin private keys from Copay cryptocurrency wallet users. Over 8 million downloads before detection.",
+            "fixed_in": "0.1.2"
+          }
+        ],
+        "ecosystem": "npm"
+      },
+      {
+        "id": "through@2.3.8",
+        "name": "through",
+        "version": "2.3.8",
+        "isDirect": true,
+        "cves": [],
+        "ecosystem": "npm"
+      },
+      {
+        "id": "from@0.1.7",
+        "name": "from",
+        "version": "0.1.7",
+        "isDirect": true,
+        "cves": [],
+        "ecosystem": "npm"
+      },
+      {
+        "id": "stream-combiner@0.0.4",
+        "name": "stream-combiner",
+        "version": "0.0.4",
+        "isDirect": true,
+        "cves": [],
+        "ecosystem": "npm"
+      },
+      {
+        "id": "map-stream@0.1.0",
+        "name": "map-stream",
+        "version": "0.1.0",
+        "isDirect": false,
+        "cves": [
+          {
+            "id": "CVE-2019-10744",
+            "severity": "high",
+            "score": 7.5,
+            "summary": "Prototype pollution vulnerability allowing attackers to modify Object prototype via crafted input",
+            "fixed_in": "0.1.1"
+          }
+        ],
+        "ecosystem": "npm"
+      },
+      {
+        "id": "minimist@0.0.8",
+        "name": "minimist",
+        "version": "0.0.8",
+        "isDirect": false,
+        "cves": [
+          {
+            "id": "CVE-2021-44906",
+            "severity": "critical",
+            "score": 9.8,
+            "summary": "Prototype pollution via __proto__ property in minimist argument parsing",
+            "fixed_in": "1.2.6"
+          }
+        ],
+        "ecosystem": "npm"
+      },
+      {
+        "id": "lodash@4.17.11",
+        "name": "lodash",
+        "version": "4.17.11",
+        "isDirect": false,
+        "cves": [
+          {
+            "id": "CVE-2019-10744",
+            "severity": "high",
+            "score": 7.5,
+            "summary": "Prototype pollution in defaultsDeep, merge, and mergeWith allowing remote code execution",
+            "fixed_in": "4.17.12"
+          }
+        ],
+        "ecosystem": "npm"
+      }
+    ],
+    "edges": [
+      { "from": "event-stream@root", "to": "flatmap-stream@0.1.1" },
+      { "from": "event-stream@root", "to": "through@2.3.8" },
+      { "from": "event-stream@root", "to": "from@0.1.7" },
+      { "from": "event-stream@root", "to": "stream-combiner@0.0.4" },
+      { "from": "flatmap-stream@0.1.1", "to": "map-stream@0.1.0" },
+      { "from": "stream-combiner@0.0.4", "to": "minimist@0.0.8" },
+      { "from": "through@2.3.8", "to": "lodash@4.17.11" }
+    ],
+    "vulnCount": 4
+  },
+  "ghostcommit": {
+    "findings": [
+      {
+        "commit_sha": "c7edc7f",
+        "commit_message": "description is not that important",
+        "author": "right9ctrl",
+        "date": "2018-09-09T00:00:00Z",
+        "file": "package.json",
+        "line": 5,
+        "type": "Malicious Dependency Addition",
+        "entropy": 5.2,
+        "preview": "flatmap-•••••••• (malicious version pinned)"
+      },
+      {
+        "commit_sha": "a7e7f45",
+        "commit_message": "update readme",
+        "author": "right9ctrl",
+        "date": "2018-09-15T00:00:00Z",
+        "file": "test/index.js",
+        "line": 12,
+        "type": "Encrypted Payload Injection",
+        "entropy": 6.8,
+        "preview": "AES-256•••••••• (encrypted Bitcoin key exfil)"
+      },
+      {
+        "commit_sha": "b3f1c22",
+        "commit_message": "fix tests",
+        "author": "right9ctrl",
+        "date": "2018-09-20T00:00:00Z",
+        "file": ".travis.yml",
+        "line": 3,
+        "type": "High-entropy string",
+        "entropy": 5.9,
+        "preview": "sk_live_•••••••• (possible Stripe key)"
+      }
+    ],
+    "totalCommitsScanned": 30
+  },
+  "layerscan": {
+    "findings": [
+      {
+        "layer": 0,
+        "instruction": "missing USER",
+        "issue": "No USER directive — container runs as root. If compromised, attacker has full root on the container.",
+        "severity": "critical",
+        "fix": "Add: RUN addgroup -S appgroup && adduser -S appuser -G appgroup\nUSER appuser"
+      },
+      {
+        "layer": 1,
+        "instruction": "FROM node:latest",
+        "issue": "Using :latest tag — non-reproducible builds, unpredictable security posture across deploys",
+        "severity": "high",
+        "fix": "Pin to a specific digest: FROM node:20.11.0-alpine@sha256:<digest>"
+      },
+      {
+        "layer": 3,
+        "instruction": "COPY . .",
+        "issue": "COPY . . copies .env, .git, secrets, and all dev files into the image",
+        "severity": "high",
+        "fix": "Add .dockerignore: .env, .git, node_modules, *.key, *.pem"
+      }
+    ],
+    "baseImage": "node:latest"
+  },
+  "apibleed": {
+    "endpoints": [
+      {
+        "path": "/api/transfer",
+        "method": "POST",
+        "file": "src/app/api/transfer/route.ts",
+        "hasAuth": false,
+        "issues": ["No authentication detected on write endpoint", "No rate limiting detected"],
+        "severity": "critical"
+      },
+      {
+        "path": "/api/admin/users",
+        "method": "GET",
+        "file": "src/app/api/admin/users/route.ts",
+        "hasAuth": false,
+        "issues": ["Admin route exposed", "No authentication detected"],
+        "severity": "critical"
+      },
+      {
+        "path": "/api/health",
+        "method": "GET",
+        "file": "src/app/api/health/route.ts",
+        "hasAuth": false,
+        "issues": ["Health check may expose system info"],
+        "severity": "medium"
+      },
+      {
+        "path": "/api/products",
+        "method": "GET",
+        "file": "src/app/api/products/route.ts",
+        "hasAuth": false,
+        "issues": [],
+        "severity": "info"
+      }
+    ],
+    "unsecuredCount": 2
+  },
+  "envtrace": {
+    "findings": [
+      {
+        "file": ".env",
+        "type": "exposed_env",
+        "severity": "critical",
+        "detail": "Live .env file committed to repository. Real values found: STRIPE_SECRET_KEY=[REDACTED], DATABASE_URL=[REDACTED]",
+        "line": 1
+      },
+      {
+        "file": ".gitignore",
+        "type": "missing_gitignore",
+        "severity": "high",
+        "detail": ".env is not listed in .gitignore — all future env files will be tracked by git automatically"
+      }
+    ]
+  },
+  "aiExplanation": {
+    "summary": "This repository has a confirmed supply chain compromise (CVE score 9.8) where a malicious maintainer injected Bitcoin-stealing code affecting 8 million+ downloads. Combined with exposed credentials and unauthenticated admin endpoints, this codebase represents an active multi-vector threat.",
+    "items": [
+      {
+        "title": "flatmap-stream@0.1.1 — Confirmed Supply Chain Attack",
+        "why_dangerous": "A new maintainer (right9ctrl) injected an AES-256 encrypted payload that decrypted at runtime to steal Bitcoin private keys from Copay wallet users. The payload only activated in production environments and remained undetected for 2 months despite 8 million downloads.",
+        "exact_fix": "Run: npm audit fix --force. Pin flatmap-stream to >=0.1.2 in package.json. Run npm ci instead of npm install to enforce lockfile. Add npm audit to your CI pipeline.",
+        "real_example": "This is the actual event-stream attack (November 2018). The Copay Bitcoin wallet shipped this dependency and exposed users' private keys. BitPay estimated millions in potential losses."
+      },
+      {
+        "title": "Exposed .env with Live Credentials",
+        "why_dangerous": "Your Stripe secret key and database connection string are publicly readable on GitHub. An attacker can extract your Stripe key in under 60 seconds using GitHub code search and charge arbitrary amounts to your Stripe account.",
+        "exact_fix": "1. Immediately rotate all keys in the .env file. 2. Run: git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch .env' HEAD. 3. Add .env to .gitignore. 4. Use GitHub's secret scanning alerts for future protection.",
+        "real_example": "In 2022, a developer accidentally committed AWS credentials to a public GitHub repo. Within 4 minutes of the push, automated bots had found the keys and spun up $50,000 in EC2 mining instances."
+      }
+    ]
+  }
+}

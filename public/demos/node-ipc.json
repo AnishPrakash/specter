@@ -1,0 +1,61 @@
+{
+  "scanId": "demo-node-ipc-2022",
+  "repoUrl": "https://github.com/RIAEvangelist/node-ipc",
+  "status": "completed",
+  "threatScore": 88,
+  "depchain": {
+    "nodes": [
+      { "id": "node-ipc@root", "name": "node-ipc", "version": "10.1.0", "isRoot": true, "cves": [], "ecosystem": "npm" },
+      {
+        "id": "node-ipc@9.2.2",
+        "name": "node-ipc",
+        "version": "9.2.2",
+        "isDirect": true,
+        "cves": [
+          {
+            "id": "CVE-2022-23812",
+            "severity": "critical",
+            "score": 9.8,
+            "summary": "Protestware: maintainer intentionally added code to overwrite files with a peace symbol emoji on systems with Russian/Belarusian IP addresses. Affected vue-cli and hundreds of downstream packages.",
+            "fixed_in": "10.1.1"
+          }
+        ],
+        "ecosystem": "npm"
+      }
+    ],
+    "edges": [
+      { "from": "node-ipc@root", "to": "node-ipc@9.2.2" }
+    ],
+    "vulnCount": 1
+  },
+  "ghostcommit": {
+    "findings": [
+      {
+        "commit_sha": "d239659",
+        "commit_message": "v10.1.0",
+        "author": "RIAEvangelist",
+        "date": "2022-03-07T00:00:00Z",
+        "file": "lib/services/getLocalExternalIP.js",
+        "line": 1,
+        "type": "Malicious IP-based file wiper",
+        "entropy": 5.7,
+        "preview": "peaceNotWar•••••••• (overwrites /etc files)"
+      }
+    ],
+    "totalCommitsScanned": 25
+  },
+  "layerscan": { "findings": [], "baseImage": "No Dockerfile found" },
+  "apibleed": { "endpoints": [], "unsecuredCount": 0 },
+  "envtrace": { "findings": [] },
+  "aiExplanation": {
+    "summary": "This repository contains confirmed protestware (CVE-2022-23812) where the maintainer deliberately added geolocation-based file destruction targeting Russian and Belarusian IP addresses. This affected vue-cli and millions of downstream users.",
+    "items": [
+      {
+        "title": "node-ipc@9.2.2 — Intentional Protestware",
+        "why_dangerous": "The package maintainer deliberately published code that checks the user's IP geolocation and overwrites files with a peace symbol emoji if the IP resolves to Russia or Belarus. This is intentional sabotage by a trusted maintainer — the worst kind of supply chain attack.",
+        "exact_fix": "Pin node-ipc to >=10.1.1 in package.json. Run npm ci. Add a pre-install script to audit for known bad package versions.",
+        "real_example": "This is the real node-ipc incident from March 2022. It directly affected vue-cli which has 30+ million weekly downloads. Many enterprise CI pipelines were disrupted."
+      }
+    ]
+  }
+}
