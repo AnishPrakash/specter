@@ -1,12 +1,9 @@
 'use client';
-import dynamic from 'next/dynamic';
 import { useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScanStore } from '@/store/scanStore';
 import type { ScanResult } from '@/types';
-
-const SpectreScene = dynamic(() => import('@/components/Scene/SpectreScene'), { ssr: false });
 
 const DEMOS = [
   { id: 'event-stream', label: 'event-stream attack', year: '2018' },
@@ -56,14 +53,9 @@ export default function Home() {
   }, [router, setScanResult]);
 
   return (
-    <main className="relative w-full h-screen overflow-hidden bg-gray-950">
-      {/* Full-screen 3D background */}
-      <div className="absolute inset-0">
-        <SpectreScene />
-      </div>
-
-      {/* Overlay UI */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+    <main className="relative w-full h-screen overflow-hidden bg-transparent">
+      {/* Overlay UI - Added pt-24 to push content down slightly */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-24">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -104,7 +96,6 @@ export default function Home() {
 
           {/* URL Input */}
           <div className="relative w-full mb-4">
-            {/* Corner brackets — HUD detail */}
             <div className="absolute top-0 left-0 w-3 h-3 pointer-events-none"
               style={{ borderTop: '1px solid var(--accent)', borderLeft: '1px solid var(--accent)' }} />
             <div className="absolute bottom-0 right-[100px] w-3 h-3 pointer-events-none"
@@ -132,7 +123,7 @@ export default function Home() {
             <button
               onClick={() => url && startScan(url)}
               disabled={loading || !url.trim()}
-              className="absolute right-0 top-0 bottom-0 px-5 rounded-r-sm font-mono text-[11px] font-bold tracking-widest uppercase transition-all duration-200"
+              className="absolute right-0 top-0 bottom-0 px-5 rounded-r-sm font-mono text-[11px] font-bold tracking-widest uppercase transition-all duration-200 cursor-pointer"
               style={{
                 background: loading || !url.trim() ? 'var(--surface)' : 'var(--accent)',
                 color: loading || !url.trim() ? 'var(--muted)' : 'white',
@@ -162,7 +153,7 @@ export default function Home() {
                 key={d.id}
                 onClick={() => loadDemo(`${d.id}.json`)}
                 disabled={loading}
-                className="group relative flex-1 py-3 px-3 rounded overflow-hidden transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative flex-1 py-3 px-3 rounded overflow-hidden transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 style={{
                   background: 'var(--surface)',
                   border: '1px solid var(--border)',
@@ -170,21 +161,18 @@ export default function Home() {
                 onMouseEnter={e => !loading && (e.currentTarget.style.borderColor = 'rgba(239,68,68,0.4)')}
                 onMouseLeave={e => !loading && (e.currentTarget.style.borderColor = 'var(--border)')}
               >
-                {/* Year badge */}
                 <span
                   className="block font-mono text-[8px] tracking-[0.2em] uppercase mb-1"
                   style={{ color: '#ef4444' }}
                 >
                   {d.year} · CONFIRMED ATTACK
                 </span>
-                {/* Label */}
                 <span
                   className="block font-mono text-[11px] transition-colors duration-200"
                   style={{ color: 'var(--ink)' }}
                 >
                   {d.label}
                 </span>
-                {/* Hover line */}
                 <div
                   className="absolute bottom-0 left-0 right-0 h-px transition-all duration-300"
                   style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.6), transparent)' }}

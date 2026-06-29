@@ -5,15 +5,12 @@ import FindingsList from '@/components/ui/FindingsList';
 import AIPanel from '@/components/ui/AIPanel';
 import ThreatFlash from '@/components/ui/ThreatFlash';
 import ScanLoader from '@/components/ui/ScanLoader';
-import SpecterLogo from '@/components/ui/SpecterLogo'; // Added SpecterLogo import based on HUD spec
-import dynamic from 'next/dynamic';
+import SpecterLogo from '@/components/ui/SpecterLogo';
 import { useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScanStore } from '@/store/scanStore';
 import { generateReport } from '@/lib/report';
-
-const SpectreScene = dynamic(() => import('@/components/Scene/SpectreScene'), { ssr: false });
 
 const SCANNER_LABELS: Record<string, string> = {
   depchain: 'DepChain', ghostcommit: 'GhostCommit', layerscan: 'LayerScan',
@@ -28,10 +25,9 @@ export default function ScanPage() {
 
   const handleBack = () => {
     reset();
-    router.back();
+    router.push('/');
   };
 
-  // Fetch AI explanation once scan completes
   useEffect(() => {
     if (!scanResult || scanResult.status !== 'completed' || aiRef.current.fetched) return;
     if (scanResult.aiExplanation) return;
@@ -59,16 +55,10 @@ export default function ScanPage() {
 
   const isReady = !!scanResult;
 
-  // ── SHARED SIDEBAR CONTENT ──
-  // Used by both the Desktop Panel and Mobile Bottom Sheet
   const SidebarContent = () => (
     <>
-      {/* HUD Scan Line Sweep */}
       <div className="scan-line-effect absolute inset-0 pointer-events-none z-10 overflow-hidden rounded-none" />
-
-      {/* Score header */}
       <div className="px-5 md:pt-16 pt-4 pb-4 shrink-0 relative z-20" style={{ borderBottom: '1px solid var(--border)' }}>
-        {/* Export PDF Button */}
         <div className="absolute top-4 right-5 z-20">
           <button
             onClick={() => generateReport(scanResult!)}
@@ -93,22 +83,18 @@ export default function ScanPage() {
             <span className="font-mono text-[10px] tracking-wider">EXPORT PDF</span>
           </button>
         </div>
-        
         <ThreatScore score={scanResult!.threatScore} repoUrl={scanResult!.repoUrl} />
       </div>
 
-      {/* Scanner badges */}
       <div className="px-5 py-3 shrink-0 relative z-20" style={{ borderBottom: '1px solid var(--border)' }}>
         <ScannerBadges result={scanResult!} />
       </div>
 
-      {/* Scrollable findings + AI */}
       <div className="flex-1 overflow-y-auto relative z-20">
         <FindingsList result={scanResult!} />
         {scanResult!.aiExplanation && <AIPanel explanation={scanResult!.aiExplanation} />}
       </div>
 
-      {/* Footer — repo URL, mono, dim */}
       <div
         className="px-5 py-2.5 shrink-0 flex items-center justify-between relative z-20 bg-void/50 backdrop-blur-sm"
         style={{ borderTop: '1px solid var(--border)' }}
@@ -125,29 +111,22 @@ export default function ScanPage() {
   );
 
   return (
-    <main className="relative w-full h-screen overflow-hidden bg-void">
-      {/* 3D Scene */}
-      <div className="absolute inset-0 z-0">
-        <SpectreScene />
-      </div>
-
+    <main className="relative w-full h-screen overflow-hidden bg-transparent">
       {isReady && <ThreatFlash score={scanResult!.threatScore} />}
 
-      {/* HUD-styled Back button */}
+      {/* Upgraded High-Visibility Back button */}
       <button
         onClick={handleBack}
-        className="absolute top-4 left-4 z-50 flex items-center gap-2 group transition-all duration-200 px-3 py-2 rounded-sm"
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 group transition-all duration-200 px-4 py-2.5 rounded shadow-lg pointer-events-auto cursor-pointer"
         style={{
-          background: 'rgba(8,13,24,0.85)',
-          border: '1px solid var(--border)',
-          color: 'var(--ink)',
-          backdropFilter: 'blur(4px)',
+          background: 'rgba(37,99,235,0.15)', // Accent tint
+          border: '1px solid var(--accent)',
+          backdropFilter: 'blur(8px)',
         }}
       >
         <SpecterLogo size="sm" />
         <span
-          className="font-mono text-[9px] tracking-widest uppercase group-hover:text-white transition-colors"
-          style={{ color: 'var(--muted)' }}
+          className="font-mono text-[10px] tracking-widest uppercase font-bold text-white group-hover:text-accent-hi transition-colors"
         >
           ← NEW SCAN
         </span>
@@ -169,11 +148,11 @@ export default function ScanPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="text-center p-6 rounded-lg border backdrop-blur-md" style={{ background: 'var(--surface)', borderColor: 'var(--border-hi)' }}>
+            <div className="text-center p-6 rounded-lg border backdrop-blur-md pointer-events-auto" style={{ background: 'var(--surface)', borderColor: 'var(--border-hi)' }}>
               <p className="font-mono text-[11px] mb-4" style={{ color: 'var(--critical)' }}>{error}</p>
               <button 
                 onClick={handleBack} 
-                className="pointer-events-auto font-mono text-[10px] tracking-widest uppercase px-4 py-2 rounded-sm transition-colors"
+                className="pointer-events-auto cursor-pointer font-mono text-[10px] tracking-widest uppercase px-4 py-2 rounded-sm transition-colors"
                 style={{ background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid var(--border-hi)' }}
               >
                 TRY ANOTHER REPO →
@@ -183,13 +162,12 @@ export default function ScanPage() {
         )}
       </AnimatePresence>
 
-      {/* ── RESPONSIVE SIDEBAR / BOTTOM SHEET ── */}
       <AnimatePresence>
         {isReady && (
           <>
-            {/* ── DESKTOP: Right-side panel (md and above) ── */}
+            {/* Desktop Panel */}
             <motion.aside
-              className="hidden md:flex absolute top-0 right-0 h-full w-[380px] lg:w-[400px] flex-col z-30 overflow-hidden"
+              className="hidden md:flex absolute top-0 right-0 h-full w-[380px] lg:w-[400px] flex-col z-30 overflow-hidden pointer-events-auto"
               style={{
                 background: 'rgba(4,8,15,0.96)',
                 borderLeft: '1px solid var(--border-hi)',
@@ -203,9 +181,9 @@ export default function ScanPage() {
               <SidebarContent />
             </motion.aside>
 
-            {/* ── MOBILE: Bottom sheet (below md) ── */}
+            {/* Mobile Sheet */}
             <motion.aside
-              className="flex md:hidden absolute bottom-0 left-0 right-0 flex-col z-40 overflow-hidden"
+              className="flex md:hidden absolute bottom-0 left-0 right-0 flex-col z-40 overflow-hidden pointer-events-auto"
               style={{
                 height: '65vh',
                 background: 'rgba(4,8,15,0.97)',
@@ -219,11 +197,9 @@ export default function ScanPage() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 250 }}
             >
-              {/* Pull handle styling signaling scrollability */}
               <div className="flex justify-center pt-3 pb-1 shrink-0 w-full relative z-20">
                 <div className="w-12 h-1.5 rounded-full" style={{ background: 'var(--border-hi)' }} />
               </div>
-              
               <SidebarContent />
             </motion.aside>
           </>

@@ -84,7 +84,7 @@ export default function SpectreScene() {
       <pointLight position={[0, -80, -200]} intensity={0.3} color="#2563eb" />
       <DynamicThreatLight score={score} />
 
-      <Stars radius={400} depth={60} count={3000} factor={4} saturation={0} fade speed={0.5} />
+      <Stars radius={400} depth={60} count={3000} factor={6} saturation={0} fade speed={3} />
       {isReady && <GroundGrid />}
 
       <Suspense fallback={null}>
