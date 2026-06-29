@@ -22,7 +22,9 @@ export default function ScannerBadges({ result }: Props) {
       </span>
       <div className="grid grid-cols-5 gap-1">
         {SCANNERS.map(({ key, label, abbr }, i) => {
-          const active = !!(result as Record<string, unknown>)[key];
+          // FIXED: Use `key as keyof ScanResult` instead of casting `result`
+          const active = !!result[key as keyof ScanResult];
+          
           return (
             <motion.div
               key={key}
