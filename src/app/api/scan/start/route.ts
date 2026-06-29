@@ -7,6 +7,9 @@ import { runLayerScan } from '@/lib/scanners/layerscan';
 import { runAPIBleed } from '@/lib/scanners/apibleed';
 import { runEnvTrace } from '@/lib/scanners/envtrace';
 
+// TODO: Ensure you import your rateLimit function here
+import { rateLimit } from '@/lib/rateLimit'; 
+
 function calcThreatScore(r: { depchain: any; ghostcommit: any; layerscan: any; apibleed: any; envtrace: any }): number {
   const critDockerEnv =
     (r.layerscan?.findings?.filter((f: any) => f.severity === 'critical').length ?? 0) +
@@ -24,6 +27,12 @@ function calcThreatScore(r: { depchain: any; ghostcommit: any; layerscan: any; a
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limiting check added to the top
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ?? 'unknown';
+  if (!rateLimit(ip)) {
+    return NextResponse.json({ error: 'Rate limit: 5 scans per hour' }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => ({}));
   const { repoUrl } = body;
   if (!repoUrl) return NextResponse.json({ error: 'repoUrl required' }, { status: 400 });
