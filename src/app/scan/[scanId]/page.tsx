@@ -6,7 +6,7 @@ import AIPanel from '@/components/ui/AIPanel';
 import ThreatFlash from '@/components/ui/ThreatFlash';
 import ScanLoader from '@/components/ui/ScanLoader';
 import SpecterLogo from '@/components/ui/SpecterLogo';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScanStore } from '@/store/scanStore';
@@ -22,6 +22,9 @@ export default function ScanPage() {
   const router = useRouter();
   const { scanResult, isPolling, isLoading, error, reset } = useScanStore();
   const aiRef = useRef<{ fetched: boolean }>({ fetched: false });
+  
+  // ── SLIDER STATE FOR MOBILE ──
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
 
   const handleBack = () => {
     reset();
@@ -58,7 +61,7 @@ export default function ScanPage() {
   const SidebarContent = () => (
     <>
       <div className="scan-line-effect absolute inset-0 pointer-events-none z-10 overflow-hidden rounded-none" />
-      <div className="px-5 md:pt-16 pt-4 pb-4 shrink-0 relative z-20" style={{ borderBottom: '1px solid var(--border)' }}>
+      <div className="px-5 md:pt-16 pt-2 pb-4 shrink-0 relative z-20" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="absolute top-4 right-5 z-20">
           <button
             onClick={() => generateReport(scanResult!)}
@@ -114,12 +117,11 @@ export default function ScanPage() {
     <main className="relative w-full h-screen overflow-hidden bg-transparent">
       {isReady && <ThreatFlash score={scanResult!.threatScore} />}
 
-      {/* Upgraded High-Visibility Back button */}
       <button
         onClick={handleBack}
         className="absolute top-6 left-6 z-50 flex items-center gap-2 group transition-all duration-200 px-4 py-2.5 rounded shadow-lg pointer-events-auto cursor-pointer"
         style={{
-          background: 'rgba(37,99,235,0.15)', // Accent tint
+          background: 'rgba(37,99,235,0.15)',
           border: '1px solid var(--accent)',
           backdropFilter: 'blur(8px)',
         }}
@@ -132,14 +134,12 @@ export default function ScanPage() {
         </span>
       </button>
 
-      {/* Loading state */}
       <AnimatePresence>
         {(isPolling || isLoading) && !isReady && (
           <ScanLoader />
         )}
       </AnimatePresence>
 
-      {/* Error state */}
       <AnimatePresence>
         {error && (
           <motion.div
@@ -181,25 +181,39 @@ export default function ScanPage() {
               <SidebarContent />
             </motion.aside>
 
-            {/* Mobile Sheet */}
+            {/* Mobile Sheet — Now fully draggable and toggleable */}
             <motion.aside
               className="flex md:hidden absolute bottom-0 left-0 right-0 flex-col z-40 overflow-hidden pointer-events-auto"
               style={{
-                height: '65vh',
                 background: 'rgba(4,8,15,0.97)',
                 borderTop: '1px solid var(--border-hi)',
                 borderRadius: '20px 20px 0 0',
                 backdropFilter: 'blur(12px)',
                 boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
               }}
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
+              initial={{ y: '100%', height: '40vh' }}
+              animate={{ y: 0, height: isMobileExpanded ? '85vh' : '40vh' }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 250 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             >
-              <div className="flex justify-center pt-3 pb-1 shrink-0 w-full relative z-20">
-                <div className="w-12 h-1.5 rounded-full" style={{ background: 'var(--border-hi)' }} />
-              </div>
+              {/* Interactive Pull Handle */}
+              <motion.div 
+                className="flex justify-center pt-4 pb-3 shrink-0 w-full relative z-20 cursor-grab active:cursor-grabbing touch-none"
+                drag="y"
+                dragConstraints={{ top: 0, bottom: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(e, info) => {
+                  if (info.offset.y < -20) setIsMobileExpanded(true);  // Dragged up
+                  if (info.offset.y > 20) setIsMobileExpanded(false); // Dragged down
+                }}
+                onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+              >
+                <div 
+                  className="w-12 h-1.5 rounded-full transition-colors" 
+                  style={{ background: isMobileExpanded ? 'var(--accent)' : 'var(--border-hi)' }} 
+                />
+              </motion.div>
+              
               <SidebarContent />
             </motion.aside>
           </>

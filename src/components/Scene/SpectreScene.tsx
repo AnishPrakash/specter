@@ -15,7 +15,6 @@ import AttackPaths from './AttackPaths';
 import GroundGrid from './GroundGrid';
 
 // ── CINEMATIC CAMERA ANIMATOR ──
-// Notice the `| null` added to the controlsRef type definition here
 function SceneAnimator({ isReady, controlsRef }: { isReady: boolean; controlsRef: React.RefObject<OrbitControlsImpl | null> }) {
   const vecPos = new THREE.Vector3();
   const vecLook = new THREE.Vector3();
@@ -23,8 +22,12 @@ function SceneAnimator({ isReady, controlsRef }: { isReady: boolean; controlsRef
   useFrame((state, delta) => {
     if (!controlsRef.current) return;
 
+    // CRITICAL FIX: Prevent the camera from "snapping" if React drops 
+    // frames while mounting the heavy 3D data. Max delta = 50ms.
+    const safeDelta = Math.min(delta, 0.05);
+
     if (!isReady) {
-      // Landing page: Camera is lower, looking WAY down. 
+      // Landing page: Camera is lower, looking down. 
       vecPos.set(0, 10, 160);
       vecLook.set(0, -45, 0);
     } else {
@@ -33,9 +36,9 @@ function SceneAnimator({ isReady, controlsRef }: { isReady: boolean; controlsRef
       vecLook.set(0, -30, 0);
     }
 
-    // Smoothly interpolate position and target
-    state.camera.position.lerp(vecPos, delta * 3);
-    controlsRef.current.target.lerp(vecLook, delta * 3);
+    // Smoothly interpolate position and target using the clamped delta
+    state.camera.position.lerp(vecPos, safeDelta * 4);
+    controlsRef.current.target.lerp(vecLook, safeDelta * 4);
     controlsRef.current.update();
   });
 
@@ -80,7 +83,6 @@ export default function SpectreScene() {
       <pointLight position={[0, -80, -200]} intensity={0.3} color="#2563eb" />
       <DynamicThreatLight score={score} />
 
-      {/* Increased speed and factor to make the stars twinkle actively */}
       <Stars radius={400} depth={60} count={3000} factor={6} saturation={0} fade speed={3} />
       {isReady && <GroundGrid />}
 

@@ -54,8 +54,8 @@ export default function Home() {
 
   return (
     <main className="relative w-full h-screen overflow-hidden bg-transparent">
-      {/* Overlay UI - Added pt-24 to push content down slightly */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-24">
+      {/* Overlay UI - Changed pt-24 to pt-[15vh] to push it down dynamically */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-[15vh]">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -66,12 +66,12 @@ export default function Home() {
           <div className="mb-2">
             <span className="text-6xl font-black tracking-tighter text-white">SPECTER</span>
           </div>
-          <p className="text-blue-400 text-lg mb-10 tracking-wide">
+          <p className="text-blue-400 text-lg mb-12 tracking-wide">
             The ghosts in your codebase. Made visible.
           </p>
 
           {/* Stats row */}
-          <div className="flex gap-8 mb-8 justify-center">
+          <div className="flex gap-8 mb-10 justify-center">
             {[
               { value: '742%', label: 'supply chain attacks up', sub: '2022 → 2024' },
               { value: '8M+',  label: 'devs hit by event-stream', sub: 'Nov 2018' },
@@ -94,8 +94,8 @@ export default function Home() {
             ))}
           </div>
 
-          {/* URL Input */}
-          <div className="relative w-full mb-4">
+          {/* URL Input - Added more margin top and bottom */}
+          <div className="relative w-full mt-4 mb-8">
             <div className="absolute top-0 left-0 w-3 h-3 pointer-events-none"
               style={{ borderTop: '1px solid var(--accent)', borderLeft: '1px solid var(--accent)' }} />
             <div className="absolute bottom-0 right-[100px] w-3 h-3 pointer-events-none"
@@ -109,7 +109,7 @@ export default function Home() {
               onKeyDown={(e) => e.key === 'Enter' && url && startScan(url)}
               placeholder="https://github.com/owner/repo"
               disabled={loading}
-              className="w-full px-4 py-3.5 rounded-sm outline-none transition-all duration-200 font-mono text-sm disabled:opacity-50"
+              className="w-full px-5 py-4 rounded-sm outline-none transition-all duration-200 font-mono text-sm disabled:opacity-50"
               style={{
                 background: 'rgba(8,13,24,0.9)',
                 border: '1px solid var(--border-hi)',
@@ -123,7 +123,7 @@ export default function Home() {
             <button
               onClick={() => url && startScan(url)}
               disabled={loading || !url.trim()}
-              className="absolute right-0 top-0 bottom-0 px-5 rounded-r-sm font-mono text-[11px] font-bold tracking-widest uppercase transition-all duration-200 cursor-pointer"
+              className="absolute right-0 top-0 bottom-0 px-6 rounded-r-sm font-mono text-[11px] font-bold tracking-widest uppercase transition-all duration-200 cursor-pointer"
               style={{
                 background: loading || !url.trim() ? 'var(--surface)' : 'var(--accent)',
                 color: loading || !url.trim() ? 'var(--muted)' : 'white',
@@ -146,14 +146,14 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          {/* Demo buttons */}
-          <div className="flex gap-2.5 w-full mb-8 mt-2">
+          {/* Demo buttons - Increased gap and margins */}
+          <div className="flex gap-4 w-full mb-8 mt-6">
             {DEMOS.map(d => (
               <button
                 key={d.id}
                 onClick={() => loadDemo(`${d.id}.json`)}
                 disabled={loading}
-                className="group relative flex-1 py-3 px-3 rounded overflow-hidden transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="group relative flex-1 py-3.5 px-4 rounded overflow-hidden transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 style={{
                   background: 'var(--surface)',
                   border: '1px solid var(--border)',
@@ -182,9 +182,9 @@ export default function Home() {
           </div>
 
           {/* Scanner badges */}
-          <div className="flex gap-2 justify-center flex-wrap">
+          <div className="flex gap-2 justify-center flex-wrap mt-8">
             {['DepChain','GhostCommit','LayerScan','APIBleed','EnvTrace'].map((s) => (
-              <span key={s} className="text-xs text-gray-500 border border-gray-700 rounded px-2 py-1">
+              <span key={s} className="text-[10px] text-gray-500 border border-gray-800 bg-gray-950/50 rounded px-2.5 py-1 font-mono uppercase tracking-wider">
                 {s}
               </span>
             ))}
