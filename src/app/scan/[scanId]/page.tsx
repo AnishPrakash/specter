@@ -24,14 +24,13 @@ const SEV_COLORS: Record<string, string> = {
 export default function ScanPage() {
   const params = useParams();
   const router = useRouter();
-  const { scanResult, isPolling, isLoading, error, sidebarOpen, selectedNode, setSidebarOpen, reset } = useScanStore();
+  const { scanResult, isPolling, isLoading, error, reset } = useScanStore();
   const aiRef = useRef<{ fetched: boolean }>({ fetched: false });
-  const [aiExplanation, setAiExplanation] = useScanStore((s) => [s.scanResult?.aiExplanation, () => {}]);
 
   // Fetch AI explanation once scan completes
   useEffect(() => {
     if (!scanResult || scanResult.status !== 'completed' || aiRef.current.fetched) return;
-    if (scanResult.aiExplanation) return; // already in demo data
+    if (scanResult.aiExplanation) return;
     aiRef.current.fetched = true;
 
     const allFindings = [
