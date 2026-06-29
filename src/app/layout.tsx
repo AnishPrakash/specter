@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import dynamic from "next/dynamic";
-
-// Dynamically import the scene so it only runs on the client
-const SpectreScene = dynamic(() => import('@/components/Scene/SpectreScene'), { ssr: false });
+import GlobalScene from "@/components/Scene/GlobalScene";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +32,7 @@ export default function RootLayout({
         
         {/* GLOBAL CANVAS - Persists across all page navigations! */}
         <div className="absolute inset-0 z-0 pointer-events-auto">
-          <SpectreScene />
+          <GlobalScene />
         </div>
 
         {/* UI Layer - pointer-events-none allows clicks to pass through to the 3D scene */}
