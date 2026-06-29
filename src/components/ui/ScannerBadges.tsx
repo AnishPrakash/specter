@@ -1,4 +1,3 @@
-// src/components/ui/ScannerBadges.tsx
 'use client';
 import { motion } from 'framer-motion';
 import type { ScanResult } from '@/types';
@@ -22,16 +21,15 @@ export default function ScannerBadges({ result }: Props) {
       </span>
       <div className="grid grid-cols-5 gap-1">
         {SCANNERS.map(({ key, label, abbr }, i) => {
-          // FIXED: Use `key as keyof ScanResult` instead of casting `result`
           const active = !!result[key as keyof ScanResult];
           
           return (
             <motion.div
               key={key}
-              className="relative flex flex-col items-center py-2 px-1 rounded"
+              className="relative flex flex-col items-center py-2 px-1 rounded-sm"
               style={{
-                background: active ? 'rgba(34,197,94,0.06)' : 'var(--surface)',
-                border: `1px solid ${active ? 'rgba(34,197,94,0.2)' : 'var(--border)'}`,
+                background: active ? 'var(--safe-dim)' : 'var(--surface)',
+                border: `1px solid ${active ? 'color-mix(in srgb, var(--safe) 20%, transparent)' : 'var(--border)'}`,
               }}
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
@@ -42,7 +40,7 @@ export default function ScannerBadges({ result }: Props) {
                 className="w-1.5 h-1.5 rounded-full mb-1.5"
                 style={{
                   background: active ? 'var(--safe)' : 'var(--muted)',
-                  boxShadow: active ? '0 0 6px rgba(34,197,94,0.6)' : 'none',
+                  boxShadow: active ? '0 0 6px color-mix(in srgb, var(--safe) 60%, transparent)' : 'none',
                 }}
               />
               {/* Abbreviation — the primary HUD read */}

@@ -1,4 +1,3 @@
-// src/components/ui/ThreatScore.tsx
 'use client';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useEffect } from 'react';
@@ -23,7 +22,7 @@ export default function ThreatScore({ score, repoUrl }: Props) {
   }, [score, count]);
 
   return (
-    <div className="hud-bracket p-1">
+    <div className="hud-bracket p-2 md:p-3">
       {/* Label row */}
       <div className="flex items-center justify-between mb-3">
         <span className="font-mono text-[9px] tracking-[0.25em] uppercase" style={{ color: 'var(--muted)' }}>
@@ -37,12 +36,11 @@ export default function ThreatScore({ score, repoUrl }: Props) {
         </span>
       </div>
 
-      {/* The number — the single most important element on the page */}
+      {/* The number — responsive font size for mobile/desktop */}
       <div className="flex items-end gap-3 mb-2">
         <motion.span
-          className="font-display font-bold leading-none"
+          className="font-display font-bold leading-none text-7xl md:text-[88px]"
           style={{
-            fontSize: 88,
             letterSpacing: '-0.05em',
             color: t.color,
             textShadow: t.glow,
@@ -70,7 +68,7 @@ export default function ThreatScore({ score, repoUrl }: Props) {
       </div>
 
       {/* Repo URL — mono, truncated, dim */}
-      <p className="font-mono text-[9px] mt-2 truncate" style={{ color: 'var(--muted)' }}>
+      <p className="font-mono text-[9px] mt-2 md:mt-3 truncate" style={{ color: 'var(--muted)' }}>
         {repoUrl.replace('https://github.com/', '')}
       </p>
     </div>

@@ -1,4 +1,3 @@
-// src/components/ui/FindingsList.tsx
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,41 +9,41 @@ interface Finding {
   id: string; scanner: string; severity: Severity; title: string; detail: string;
 }
 
-// Severity config — information density matters, not decoration
+// Severity config strictly using CSS tokens for perfect consistency
 const SEV_CONFIG: Record<Severity, {
   dotColor: string; textColor: string; bgColor: string; borderColor: string; label: string;
 }> = {
   critical: {
-    dotColor:    '#ef4444',
-    textColor:   '#f87171',
-    bgColor:     'rgba(45,10,10,0.8)',
-    borderColor: 'rgba(239,68,68,0.2)',
+    dotColor:    'var(--critical)',
+    textColor:   'var(--critical)',
+    bgColor:     'var(--critical-dim)',
+    borderColor: 'color-mix(in srgb, var(--critical) 25%, transparent)',
     label:       'CRIT',
   },
   high: {
-    dotColor:    '#f97316',
-    textColor:   '#fb923c',
-    bgColor:     'rgba(45,18,0,0.8)',
-    borderColor: 'rgba(249,115,22,0.2)',
+    dotColor:    'var(--high)',
+    textColor:   'var(--high)',
+    bgColor:     'var(--high-dim)',
+    borderColor: 'color-mix(in srgb, var(--high) 25%, transparent)',
     label:       'HIGH',
   },
   medium: {
-    dotColor:    '#eab308',
-    textColor:   '#facc15',
-    bgColor:     'rgba(31,24,0,0.8)',
-    borderColor: 'rgba(234,179,8,0.2)',
+    dotColor:    'var(--medium)',
+    textColor:   'var(--medium)',
+    bgColor:     'var(--medium-dim)',
+    borderColor: 'color-mix(in srgb, var(--medium) 25%, transparent)',
     label:       'MED',
   },
   low: {
-    dotColor:    '#7a93b8',
-    textColor:   '#7a93b8',
+    dotColor:    'var(--ink)',
+    textColor:   'var(--ink)',
     bgColor:     'var(--surface)',
     borderColor: 'var(--border)',
     label:       'LOW',
   },
   info: {
-    dotColor:    '#2a3d5c',
-    textColor:   '#2a3d5c',
+    dotColor:    'var(--muted)',
+    textColor:   'var(--muted)',
     bgColor:     'var(--surface)',
     borderColor: 'var(--border)',
     label:       'INFO',
@@ -92,7 +91,7 @@ export default function FindingsList({ result }: Props) {
   const findings = extractFindings(result);
 
   return (
-    <div className="px-4 py-4">
+    <div className="px-5 py-4">
       {/* Section header */}
       <div className="flex items-center gap-2 mb-3">
         <span className="font-mono text-[9px] tracking-[0.2em] uppercase" style={{ color: 'var(--muted)' }}>
@@ -118,10 +117,11 @@ export default function FindingsList({ result }: Props) {
           {findings.map((f, i) => {
             const cfg = SEV_CONFIG[f.severity] ?? SEV_CONFIG.info;
             const isOpen = expanded === f.id;
+            
             return (
               <motion.div
                 key={f.id}
-                className="rounded overflow-hidden cursor-pointer"
+                className="rounded-sm overflow-hidden cursor-pointer"
                 style={{
                   background: cfg.bgColor,
                   border: `1px solid ${cfg.borderColor}`,
@@ -139,7 +139,7 @@ export default function FindingsList({ result }: Props) {
                       className="w-1.5 h-1.5 rounded-full"
                       style={{
                         background: cfg.dotColor,
-                        boxShadow: `0 0 6px ${cfg.dotColor}80`,
+                        boxShadow: `0 0 6px color-mix(in srgb, ${cfg.dotColor} 50%, transparent)`,
                       }}
                     />
                     <span
@@ -190,7 +190,7 @@ export default function FindingsList({ result }: Props) {
                       className="overflow-hidden"
                     >
                       <div
-                        className="mx-2.5 mb-2.5 p-2 rounded text-[10px] font-mono leading-relaxed"
+                        className="mx-2.5 mb-2.5 p-2.5 rounded-sm text-[10px] font-mono leading-relaxed"
                         style={{
                           background: 'var(--surface)',
                           border: '1px solid var(--border)',

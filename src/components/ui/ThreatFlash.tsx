@@ -1,4 +1,3 @@
-// src/components/ui/ThreatFlash.tsx
 'use client';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,23 +11,23 @@ export default function ThreatFlash({ score }: { score: number }) {
       const t = setTimeout(() => setShow(false), 800);
       return () => clearTimeout(t);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [score]);
 
   const color = score > 70
-    ? 'rgba(239,68,68,0.10)'
+    ? 'rgba(239, 68, 68, 0.12)'
     : score > 40
-    ? 'rgba(249,115,22,0.07)'
-    : 'rgba(234,179,8,0.05)';
+    ? 'rgba(249, 115, 22, 0.08)'
+    : 'rgba(234, 179, 8, 0.06)';
 
   return (
     <AnimatePresence>
       {show && (
         <motion.div
-          className="fixed inset-0 z-50 pointer-events-none"
+          className="fixed inset-0 z-20 pointer-events-none"
           style={{ background: color }}
           initial={{ opacity: 0 }}
           animate={{ opacity: [0, 1, 0.5, 0] }}
-          transition={{ duration: 0.8, times: [0, 0.2, 0.6, 1] }}
+          transition={{ duration: 0.8, times: [0, 0.15, 0.5, 1], ease: "easeOut" }}
         />
       )}
     </AnimatePresence>

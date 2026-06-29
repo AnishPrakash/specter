@@ -1,4 +1,3 @@
-// src/components/ui/ScanLoader.tsx
 'use client';
 import { motion } from 'framer-motion';
 
@@ -20,23 +19,29 @@ export default function ScanLoader() {
     >
       {/* Radar ring */}
       <div className="relative mb-10">
-        {[0, 1, 2].map(i => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full border"
-            style={{
-              inset: -(i * 18),
-              borderColor: `rgba(37,99,235,${0.4 - i * 0.12})`,
-            }}
-            animate={{ scale: [1, 1.5], opacity: [0.6, 0] }}
-            transition={{ duration: 2, repeat: Infinity, delay: i * 0.5, ease: 'easeOut' }}
-          />
-        ))}
+        {[0, 1, 2].map(i => {
+          const opacity = Math.round((0.4 - i * 0.12) * 100);
+          return (
+            <motion.div
+              key={i}
+              className="absolute rounded-full border"
+              style={{
+                inset: -(i * 18),
+                borderColor: `color-mix(in srgb, var(--accent) ${opacity}%, transparent)`,
+              }}
+              animate={{ scale: [1, 1.5], opacity: [0.6, 0] }}
+              transition={{ duration: 2, repeat: Infinity, delay: i * 0.5, ease: 'easeOut' }}
+            />
+          );
+        })}
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(37,99,235,0.4)' }}
+          style={{ 
+            background: 'color-mix(in srgb, var(--accent) 15%, transparent)', 
+            border: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)' 
+          }}
         >
-          <div className="w-3 h-3 rounded-full" style={{ background: 'var(--accent)', boxShadow: '0 0 10px var(--accent)' }} />
+          <div className="w-3 h-3 rounded-full" style={{ background: 'var(--accent)', boxShadow: '0 0 10px var(--accent-glow)' }} />
         </div>
       </div>
 
@@ -56,7 +61,7 @@ export default function ScanLoader() {
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.25 }}
             />
-            <span className="font-mono text-[11px]" style={{ color: 'var(--specter)' }}>
+            <span className="font-mono text-[11px]" style={{ color: 'var(--white)' }}>
               {s.label}
             </span>
             <motion.span
