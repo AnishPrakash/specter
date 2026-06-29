@@ -30,18 +30,15 @@ export default function RootLayout({
     >
       <body className="h-screen w-screen overflow-hidden bg-void text-white">
         
-        {/* GLOBAL CANVAS - Persists across all page navigations! 
-            We use a separate Client Component wrapper to handle the 
-            ssr: false dynamic import correctly. */}
+        {/* GLOBAL CANVAS - Persistent 3D Background */}
         <div className="absolute inset-0 z-0 pointer-events-auto">
           <GlobalScene />
         </div>
 
-        {/* UI Layer - pointer-events-none allows clicks to pass through to the 3D scene behind */}
+        {/* UI LAYER - pointer-events-none allows clicks to pass through to the Canvas behind */}
+        {/* We use a wrapper div that is pointer-events-none, and the children (pages) will be pointer-events-auto */}
         <div className="relative z-10 h-full w-full pointer-events-none">
-          <div className="pointer-events-auto h-full w-full">
-            {children}
-          </div>
+          {children}
         </div>
         
       </body>

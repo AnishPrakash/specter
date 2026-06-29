@@ -1,10 +1,12 @@
 'use client';
+import dynamic from 'next/dynamic';
 import { useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScanStore } from '@/store/scanStore';
 import type { ScanResult } from '@/types';
 
+// SpectreScene is global now (layout.tsx), but we keep the import structure for compatibility
 const DEMOS = [
   { id: 'event-stream', label: 'event-stream attack', year: '2018' },
   { id: 'node-ipc',     label: 'node-ipc protest',    year: '2022' },
@@ -53,9 +55,10 @@ export default function Home() {
   }, [router, setScanResult]);
 
   return (
-    <main className="relative w-full h-screen overflow-hidden bg-transparent">
-      {/* Overlay UI - Changed pt-24 to pt-[15vh] to push it down dynamically */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-[15vh]">
+    <main className="relative w-full h-screen overflow-hidden bg-transparent pointer-events-none">
+      
+      {/* Overlay UI - Centered with the requested spacing */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center pt-[15vh]">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -64,7 +67,7 @@ export default function Home() {
         >
           {/* Logo */}
           <div className="mb-2">
-            <span className="text-6xl font-black tracking-tighter text-white">SPECTER</span>
+            <h1 className="text-6xl font-black tracking-tighter text-white">SPECTER</h1>
           </div>
           <p className="text-blue-400 text-lg mb-12 tracking-wide">
             The ghosts in your codebase. Made visible.
@@ -94,7 +97,7 @@ export default function Home() {
             ))}
           </div>
 
-          {/* URL Input - Added more margin top and bottom */}
+          {/* URL Input */}
           <div className="relative w-full mt-4 mb-8">
             <div className="absolute top-0 left-0 w-3 h-3 pointer-events-none"
               style={{ borderTop: '1px solid var(--accent)', borderLeft: '1px solid var(--accent)' }} />
@@ -134,7 +137,7 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Error */}
+          {/* Error display */}
           <AnimatePresence>
             {err && (
               <motion.p
@@ -146,7 +149,7 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          {/* Demo buttons - Increased gap and margins */}
+          {/* Demo buttons */}
           <div className="flex gap-4 w-full mb-8 mt-6">
             {DEMOS.map(d => (
               <button
@@ -161,22 +164,13 @@ export default function Home() {
                 onMouseEnter={e => !loading && (e.currentTarget.style.borderColor = 'rgba(239,68,68,0.4)')}
                 onMouseLeave={e => !loading && (e.currentTarget.style.borderColor = 'var(--border)')}
               >
-                <span
-                  className="block font-mono text-[8px] tracking-[0.2em] uppercase mb-1"
-                  style={{ color: '#ef4444' }}
-                >
+                <span className="block font-mono text-[8px] tracking-[0.2em] uppercase mb-1" style={{ color: '#ef4444' }}>
                   {d.year} · CONFIRMED ATTACK
                 </span>
-                <span
-                  className="block font-mono text-[11px] transition-colors duration-200"
-                  style={{ color: 'var(--ink)' }}
-                >
+                <span className="block font-mono text-[11px] transition-colors duration-200" style={{ color: 'var(--ink)' }}>
                   {d.label}
                 </span>
-                <div
-                  className="absolute bottom-0 left-0 right-0 h-px transition-all duration-300"
-                  style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.6), transparent)' }}
-                />
+                <div className="absolute bottom-0 left-0 right-0 h-px transition-all duration-300" style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.6), transparent)' }} />
               </button>
             ))}
           </div>
