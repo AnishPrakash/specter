@@ -67,6 +67,10 @@ export async function POST(req: NextRequest) {
     .insert({ repo_url: repoUrl, repo_owner: owner, repo_name: repo, status: 'scanning' })
     .select()
     .single();
+  if (error || !scan){
+    console.error('Supabase insert failed:', error);
+    return NextResponse.json({ error: error?.message ?? 'Failed to create scan' }, {status: 500});
+  }
 
   const scanId = scan.id;
   clearFileCache();
