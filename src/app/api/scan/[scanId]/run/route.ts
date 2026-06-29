@@ -12,14 +12,21 @@ export const maxDuration = 60;
 function calcThreatScore(r: {
   depchain: any; ghostcommit: any; layerscan: any; apibleed: any; envtrace: any;
 }): number {
-  const critDockerEnv =
-    (r.layerscan?.findings?.filter((f: any) => f.severity === 'critical').length ?? 0) +
-    (r.envtrace?.findings?.filter((f: any) => f.severity === 'critical').length ?? 0);
+  const sevWeight: Record<string, number> = {
+    critical: 15, high: 8, medium: 4, low: 1, info: 0,
+  };
+
+  const envFindings = r.envtrace?.findings ?? [];
+  const layerFindings = r.layerscan?.findings ?? [];
+  const envScore = envFindings.reduce((acc: number, f: any) => acc + (sevWeight[f.severity] ?? 0), 0);
+  const layerScore = layerFindings.reduce((acc: number, f: any) => acc + (sevWeight[f.severity] ?? 0), 0);
+
   const vulnDeps = r.depchain?.vulnCount ?? 0;
   const secrets = r.ghostcommit?.findings?.length ?? 0;
   const unsecuredApis = r.apibleed?.unsecuredCount ?? 0;
+
   return Math.min(
-    Math.min(critDockerEnv * 15, 40) +
+    Math.min(envScore + layerScore, 40) +
     Math.min(vulnDeps * 8, 30) +
     Math.min(secrets * 10, 20) +
     Math.min(unsecuredApis * 5, 10),
@@ -31,7 +38,6 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ scanId: string }> }
 ) {
-  // Basic internal auth check
   const secret = req.headers.get('x-internal-secret');
   if (secret !== (process.env.INTERNAL_SECRET ?? 'specter-internal')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -39,7 +45,6 @@ export async function POST(
 
   const { scanId } = await params;
 
-  // Get the scan record
   const { data: scan } = await supabaseAdmin
     .from('scans')
     .select('*')
