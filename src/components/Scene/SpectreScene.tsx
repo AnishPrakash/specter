@@ -1,5 +1,5 @@
 'use client';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { Suspense, useRef } from 'react';
@@ -15,9 +15,8 @@ import AttackPaths from './AttackPaths';
 import GroundGrid from './GroundGrid';
 
 // ── CINEMATIC CAMERA ANIMATOR ──
-// Moves the central orb above the text on the landing page, 
-// then smoothly flies out into the isometric view when scanning.
-function SceneAnimator({ isReady, controlsRef }: { isReady: boolean; controlsRef: React.RefObject<OrbitControlsImpl> }) {
+// Notice the `| null` added to the controlsRef type definition here
+function SceneAnimator({ isReady, controlsRef }: { isReady: boolean; controlsRef: React.RefObject<OrbitControlsImpl | null> }) {
   const vecPos = new THREE.Vector3();
   const vecLook = new THREE.Vector3();
 
@@ -26,7 +25,6 @@ function SceneAnimator({ isReady, controlsRef }: { isReady: boolean; controlsRef
 
     if (!isReady) {
       // Landing page: Camera is lower, looking WAY down. 
-      // This pushes the (0,0,0) coordinate (the blue orb) to the upper half of the screen.
       vecPos.set(0, 10, 160);
       vecLook.set(0, -45, 0);
     } else {
@@ -70,10 +68,8 @@ export default function SpectreScene() {
   return (
     <Canvas
       camera={{ position: [0, 10, 160], fov: 52 }}
-      style={{ background: 'var(--void)', width: '100%', height: '100vh' }}
-      // CRITICAL PERFORMANCE FIX: Cap DPR at 1.5 to stop Macs from dying on Bloom
+      style={{ background: 'transparent', width: '100%', height: '100vh' }}
       dpr={[1, 1.5]}
-      // Enable antialiasing before post-processing
       gl={{ antialias: true, powerPreference: "high-performance" }}
     >
       <SceneAnimator isReady={isReady} controlsRef={controlsRef} />
@@ -84,6 +80,7 @@ export default function SpectreScene() {
       <pointLight position={[0, -80, -200]} intensity={0.3} color="#2563eb" />
       <DynamicThreatLight score={score} />
 
+      {/* Increased speed and factor to make the stars twinkle actively */}
       <Stars radius={400} depth={60} count={3000} factor={6} saturation={0} fade speed={3} />
       {isReady && <GroundGrid />}
 
@@ -106,7 +103,6 @@ export default function SpectreScene() {
         )}
       </Suspense>
 
-      {/* CRITICAL PERFORMANCE & VISUAL FIX: multisampling=4 restores smooth anti-aliased lines */}
       <EffectComposer multisampling={4}>
         <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} intensity={1.0} />
       </EffectComposer>
