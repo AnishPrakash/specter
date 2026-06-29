@@ -11,8 +11,8 @@ export default function DockerLayers({ findings, baseImage }: Props) {
 
   return (
     <group position={[0, -135, 0]}>
-      <Text position={[0, layerCount * 7 + 12, 0]} fontSize={2.8} color="#475569" anchorX="center">
-        {hasDockerfile ? 'docker layers' : 'no dockerfile'}
+      <Text position={[0, layerCount * 7 + 12, 0]} fontSize={5} color="#ffffff" outlineWidth={0.2} outlineColor="#000000" anchorX="center">
+        {hasDockerfile ? 'DOCKER LAYERS' : 'NO DOCKERFILE'}
       </Text>
       {Array.from({ length: layerCount }).map((_, i) => {
         const finding = findings.find((f) => f.layer === i || (i === 0 && f.layer === 0));
@@ -23,20 +23,16 @@ export default function DockerLayers({ findings, baseImage }: Props) {
         const emissive = isCritical ? '#ef4444' : isVuln ? '#f59e0b' : '#3b82f6';
 
         return (
-          <group key={i} position={[0, i * 7, 0]}>
+          <group key={i} position={[0, i * 7.5, 0]}>
             <Box args={[width, 5, 35]}>
-              <meshStandardMaterial
-                color={color}
-                emissive={emissive}
-                emissiveIntensity={isVuln ? 0.5 : 0.08}
-                roughness={0.5}
-                side={THREE.DoubleSide}
-              />
+              <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={isVuln ? 0.5 : 0.08} side={THREE.DoubleSide} />
             </Box>
             <Text
               position={[0, 0, 18.5]}
-              fontSize={2.2}
-              color={isVuln ? '#fca5a5' : '#93c5fd'}
+              fontSize={3.5}
+              color="#ffffff"
+              outlineWidth={0.15}
+              outlineColor="#000000"
               anchorX="center"
               anchorY="middle"
             >

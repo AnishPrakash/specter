@@ -21,15 +21,13 @@ export default function CommitTimeline({ findings }: Props) {
 
   return (
     <group position={[0, -80, 0]}>
-      {/* Timeline axis */}
       <Box args={[280, 0.4, 0.4]}>
-        <meshStandardMaterial color="#1e293b" />
+        <meshStandardMaterial color="#3b82f6" transparent opacity={0.5} />
       </Box>
-      <Text position={[-148, 5, 0]} fontSize={2.8} color="#475569">
-        commit history
+      <Text position={[-148, 5, 0]} fontSize={4} color="#ffffff" outlineWidth={0.2} outlineColor="#000000">
+        COMMIT HISTORY
       </Text>
 
-      {/* Secret fragments */}
       <group ref={groupRef}>
         {displayed.map((f, i) => {
           const x = -120 + (i / Math.max(displayed.length - 1, 1)) * 240;
@@ -37,16 +35,17 @@ export default function CommitTimeline({ findings }: Props) {
           return (
             <group key={i} position={[x, 0, 0]}>
               <Box args={[2.5, height, 2.5]}>
-                <meshStandardMaterial
-                  color="#ef4444"
-                  emissive="#ef4444"
-                  emissiveIntensity={0.85}
-                  transparent
-                  opacity={0.9}
-                />
+                <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.85} transparent opacity={0.9} />
               </Box>
               <Billboard follow>
-                <Text position={[0, height / 2 + 4, 0]} fontSize={1.8} color="#fca5a5" anchorX="center" maxWidth={20}>
+                <Text 
+                  position={[0, height / 2 + 5, 0]} 
+                  fontSize={3.5} 
+                  color="#ffffff" 
+                  outlineWidth={0.2} 
+                  outlineColor="#000000" 
+                  anchorX="center"
+                >
                   {f.type.substring(0, 12)}
                 </Text>
               </Billboard>
@@ -54,13 +53,6 @@ export default function CommitTimeline({ findings }: Props) {
           );
         })}
       </group>
-
-      {/* Empty state */}
-      {displayed.length === 0 && (
-        <Text position={[0, 8, 0]} fontSize={3} color="#1e3a5f" anchorX="center">
-          no secrets detected
-        </Text>
-      )}
     </group>
   );
 }

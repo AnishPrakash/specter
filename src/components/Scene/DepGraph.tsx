@@ -24,21 +24,13 @@ export default function DepGraph({ nodes, edges }: Props) {
     directNodes.forEach((node, i) => {
       const angle = (i / Math.max(directNodes.length, 1)) * Math.PI * 2;
       const r = 65 + (i % 3) * 12;
-      map.set(node.id, [
-        Math.cos(angle) * r,
-        (Math.random() - 0.5) * 35,
-        Math.sin(angle) * r,
-      ]);
+      map.set(node.id, [Math.cos(angle) * r, (Math.random() - 0.5) * 35, Math.sin(angle) * r]);
     });
 
     transitiveNodes.forEach((node, i) => {
       const angle = (i / Math.max(transitiveNodes.length, 1)) * Math.PI * 2 + 0.3;
       const r = 115 + (i % 4) * 15;
-      map.set(node.id, [
-        Math.cos(angle) * r,
-        (Math.random() - 0.5) * 50,
-        Math.sin(angle) * r,
-      ]);
+      map.set(node.id, [Math.cos(angle) * r, (Math.random() - 0.5) * 50, Math.sin(angle) * r]);
     });
 
     return map;
@@ -52,7 +44,6 @@ export default function DepGraph({ nodes, edges }: Props) {
 
   return (
     <group ref={groupRef}>
-      {/* Edges */}
       {edges.map((edge, i) => {
         const from = positions.get(edge.from);
         const to = positions.get(edge.to);
@@ -63,15 +54,14 @@ export default function DepGraph({ nodes, edges }: Props) {
           <Line
             key={`e-${i}`}
             points={[from, to]}
-            color={isAttack ? '#ef4444' : '#1e3a5f'}
-            lineWidth={isAttack ? 1.8 : 0.5}
+            color={isAttack ? '#ef4444' : '#3b82f6'}
+            lineWidth={isAttack ? 3 : 1.5} // Thickened lines
             transparent
-            opacity={isAttack ? 0.8 : 0.2}
+            opacity={isAttack ? 0.9 : 0.4}
           />
         );
       })}
 
-      {/* Nodes */}
       {nodes.map((node) => {
         if (node.isRoot) return null;
         const pos = positions.get(node.id);
@@ -79,35 +69,30 @@ export default function DepGraph({ nodes, edges }: Props) {
         const isVuln = (node.cves?.length ?? 0) > 0;
         const isCritical = node.cves?.some((c) => c.severity === 'critical');
         const color = isCritical ? '#ef4444' : isVuln ? '#f59e0b' : node.isDirect ? '#60a5fa' : '#1d4ed8';
-        const size = node.isDirect ? 3.5 : 2;
+        const size = node.isDirect ? 4 : 2.5;
 
         return (
-          <group
-            key={node.id}
-            position={pos}
-            onClick={(e) => { e.stopPropagation(); setSelectedNode(node.id); }}
-          >
-            <Sphere args={[size, 20, 20]}>
-              <meshStandardMaterial
-                color={color}
-                emissive={color}
-                emissiveIntensity={isVuln ? 0.9 : 0.3}
-                roughness={0.3}
-                metalness={0.7}
-              />
+          <group key={node.id} position={pos} onClick={(e) => { e.stopPropagation(); setSelectedNode(node.id); }}>
+            {/* Smoothed Spheres (32 segments) */}
+            <Sphere args={[size, 32, 32]}>
+              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={isVuln ? 0.9 : 0.3} roughness={0.3} />
             </Sphere>
-            {/* Pulsing halo for vulnerable nodes */}
+            
             {isVuln && (
-              <Sphere args={[size + 3, 8, 8]}>
-                <meshStandardMaterial color={color} transparent opacity={0.08} wireframe />
+              <Sphere args={[size + 3.5, 16, 16]}>
+                <meshStandardMaterial color={color} transparent opacity={0.12} wireframe />
               </Sphere>
             )}
+            
             {node.isDirect && (
               <Billboard follow lockX={false} lockY={false} lockZ={false}>
+                {/* Readable Text with Outlines */}
                 <Text
-                  position={[0, size + 3, 0]}
-                  fontSize={2.5}
-                  color={isVuln ? '#fca5a5' : '#93c5fd'}
+                  position={[0, size + 4.5, 0]}
+                  fontSize={4}
+                  color="#ffffff"
+                  outlineWidth={0.25}
+                  outlineColor="#000000"
                   anchorX="center"
                   maxWidth={40}
                 >

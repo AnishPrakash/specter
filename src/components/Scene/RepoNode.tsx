@@ -9,10 +9,11 @@ export default function RepoNode() {
   const meshRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   const { scanResult } = useScanStore();
+  const isReady = !!scanResult;
   const score = scanResult?.threatScore ?? 0;
 
   const color = score > 70 ? '#ef4444' : score > 40 ? '#f59e0b' : '#3b82f6';
-  const repoName = scanResult?.repoUrl?.split('/').slice(-2).join('/') ?? 'specter';
+  const repoName = scanResult?.repoUrl?.split('/').slice(-2).join('/') ?? 'SYSTEM IDLE';
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -28,72 +29,43 @@ export default function RepoNode() {
 
   return (
     <group>
-      {/* Core sphere */}
+      {/* High-res Core sphere (64 segments makes it perfectly smooth) */}
       <Sphere ref={meshRef} args={[10, 64, 64]}>
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={0.7}
-          roughness={0.2}
-          metalness={0.9}
-        />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.7} roughness={0.2} metalness={0.9} />
       </Sphere>
 
-      {/* Outer wireframe shell */}
-      <Sphere args={[15, 16, 16]}>
-        <meshStandardMaterial
-          color={color}
-          transparent
-          opacity={0.06}
-          wireframe
-        />
+      <Sphere args={[15, 32, 32]}>
+        <meshStandardMaterial color={color} transparent opacity={0.06} wireframe />
       </Sphere>
 
-      {/* Second wireframe shell at different radius — adds depth */}
-      <Sphere args={[22, 8, 8]}>
-        <meshStandardMaterial
-          color={color}
-          transparent
-          opacity={0.03}
-          wireframe
-        />
-      </Sphere>
-
-      {/* Outer atmosphere — a slightly larger, barely-visible sphere */}
-      <Sphere args={[18, 32, 32]}>
-        <meshStandardMaterial
-          color={color}
-          transparent
-          opacity={0.04}
-          roughness={1}
-          metalness={0}
-        />
-      </Sphere>
-
-      {/* Equatorial ring */}
       <Ring ref={ringRef} args={[17, 19, 64]}>
-        <meshStandardMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={0.4}
-          transparent
-          opacity={0.5}
-          side={THREE.DoubleSide}
-        />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.4} transparent opacity={0.5} side={THREE.DoubleSide} />
       </Ring>
 
-      {/* Labels */}
-      <Text position={[0, -22, 0]} fontSize={4} color="white" anchorX="center" anchorY="middle" font={undefined}>
+      {/* TEXT UPGRADES: High contrast white with black outlines */}
+      <Text 
+        position={[0, -22, 0]} 
+        fontSize={isReady ? 4.5 : 3} 
+        color="#ffffff" 
+        outlineWidth={0.25} 
+        outlineColor="#000000" 
+        anchorX="center" 
+        anchorY="middle"
+      >
         {repoName}
       </Text>
-      {scanResult && (
-        <Text position={[0, -28, 0]} fontSize={3.5} color={color} anchorX="center" anchorY="middle">
-          {`threat score: ${score}/100`}
-        </Text>
-      )}
-      {!scanResult && (
-        <Text position={[0, -22, 0]} fontSize={3} color="#475569" anchorX="center" anchorY="middle">
-          paste a github url to scan
+      
+      {isReady && (
+        <Text 
+          position={[0, -28, 0]} 
+          fontSize={3.5} 
+          color="#ffffff" 
+          outlineWidth={0.2} 
+          outlineColor="#000000" 
+          anchorX="center" 
+          anchorY="middle"
+        >
+          {`THREAT SCORE: ${score}/100`}
         </Text>
       )}
     </group>
