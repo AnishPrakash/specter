@@ -1,4 +1,10 @@
 'use client';
+import ThreatScore from '@/components/ui/ThreatScore';
+import ScannerBadges from '@/components/ui/ScannerBadges';
+import FindingsList from '@/components/ui/FindingsList';
+import AIPanel from '@/components/ui/AIPanel';
+import ThreatFlash from '@/components/ui/ThreatFlash';
+import ScanLoader from '@/components/ui/ScanLoader';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -26,6 +32,11 @@ export default function ScanPage() {
   const router = useRouter();
   const { scanResult, isPolling, isLoading, error, reset } = useScanStore();
   const aiRef = useRef<{ fetched: boolean }>({ fetched: false });
+
+  const handleBack = () => {
+    reset();
+    router.back();
+  };
 
   // Fetch AI explanation once scan completes
   useEffect(() => {
@@ -84,26 +95,26 @@ export default function ScanPage() {
         <SpectreScene />
       </div>
 
+      {scanResult && <ThreatFlash score={scanResult.threatScore} />}
+
       {/* Back button */}
       <button
-        onClick={() => { reset(); router.push('/'); }}
-        className="absolute top-4 left-4 z-50 bg-gray-900/80 border border-gray-700 text-gray-300 text-sm px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors backdrop-blur-sm"
+        onClick={handleBack}
+        className="flex items-center gap-2 group transition-all duration-200 z-50 relative p-6"
       >
-        ← New Scan
+        <span
+          className="font-mono text-[9px] tracking-widest uppercase"
+          style={{ color: 'var(--muted)' }}
+        >
+          ← NEW SCAN
+        </span>
       </button>
 
       {/* Loading state */}
       {(isPolling || isLoading) && !scanResult && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center"
-          >
-            <div className="text-blue-400 text-lg font-medium mb-2 animate-pulse">Scanning repository...</div>
-            <div className="text-gray-500 text-sm">Running 5 scanners in parallel</div>
-          </motion.div>
-        </div>
+        <AnimatePresence>
+          <ScanLoader />
+        </AnimatePresence>
       )}
 
       {/* Error state */}
@@ -122,80 +133,75 @@ export default function ScanPage() {
       <AnimatePresence>
         {scanResult && (
           <motion.aside
-            initial={{ x: 420 }}
-            animate={{ x: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="absolute top-0 right-0 h-full w-[400px] bg-gray-950/95 border-l border-gray-800 flex flex-col backdrop-blur-md z-40 overflow-hidden"
+            className="absolute top-0 right-0 h-full z-30 w-[380px] flex flex-col"
+            style={{
+              background: 'rgba(4,8,15,0.96)',
+              borderLeft: '1px solid var(--border-hi)',
+              backdropFilter: 'blur(8px)',
+            }}
+            initial={{ x: 400, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 400, opacity: 0 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 250 }}
           >
-            {/* Header */}
-            <div className="p-5 border-b border-gray-800 shrink-0">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-gray-500 font-mono uppercase tracking-widest">threat score</span>
+            {/* Scan-line sweep effect */}
+            <div className="scan-line-effect absolute inset-0 pointer-events-none z-10 overflow-hidden rounded-none" />
+
+            {/* Score header — generous top padding to clear the top bar */}
+            <div className="px-5 pt-16 pb-4 shrink-0 relative" style={{ borderBottom: '1px solid var(--border)' }}>
+              {/* Export PDF Button positioned correctly within the new layout */}
+              <div className="absolute top-4 right-5 z-20">
                 <button
-                  onClick={() => generateReport(scanResult)}
-                  className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1.5 rounded transition-colors"
+                  onClick={() => generateReport(scanResult!)}
+                  className="group flex items-center gap-2 px-3 py-1.5 rounded transition-all duration-200 cursor-pointer"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border-hi)',
+                    color: 'var(--ink)',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'var(--accent-hi)';
+                    e.currentTarget.style.color = 'var(--white)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'var(--border-hi)';
+                    e.currentTarget.style.color = 'var(--ink)';
+                  }}
                 >
-                  Export PDF
+                  {/* Download icon — SVG, never emoji */}
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 1v7M3 6l3 3 3-3M2 10h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                  </svg>
+                  <span className="font-mono text-[10px] tracking-wider">EXPORT PDF</span>
                 </button>
               </div>
-              <div className={`text-6xl font-black mb-1 ${scoreColor}`}>{score}</div>
-              <div className="text-gray-500 text-xs">/100 — {score > 70 ? 'CRITICAL RISK' : score > 40 ? 'HIGH RISK' : score > 10 ? 'MEDIUM RISK' : 'LOW RISK'}</div>
-              <div className="text-gray-600 text-xs mt-2 font-mono truncate">{scanResult.repoUrl}</div>
+              
+              <ThreatScore score={scanResult!.threatScore} repoUrl={scanResult!.repoUrl} />
             </div>
 
-            {/* Scanner status */}
-            <div className="p-4 border-b border-gray-800 shrink-0">
-              <div className="grid grid-cols-5 gap-1.5">
-                {Object.entries(scannerStatus).map(([key, ok]) => (
-                  <div key={key} className={`text-center p-2 rounded text-xs font-mono ${ok ? 'bg-green-950/50 text-green-400 border border-green-800/30' : 'bg-gray-900 text-gray-600 border border-gray-800'}`}>
-                    <div className="text-lg mb-0.5">{ok ? '✓' : '○'}</div>
-                    <div className="text-[9px] leading-none">{SCANNER_LABELS[key]}</div>
-                  </div>
-                ))}
-              </div>
+            {/* Scanner badges */}
+            <div className="px-5 py-3 shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
+              <ScannerBadges result={scanResult!} />
             </div>
 
-            {/* Findings list */}
-            <div className="flex-1 overflow-y-auto">
-              {allFindings.length === 0 ? (
-                <div className="p-8 text-center text-gray-600 text-sm">No findings detected.</div>
-              ) : (
-                <div className="p-3 space-y-2">
-                  <div className="text-xs text-gray-500 mb-3 font-mono uppercase tracking-widest px-1">
-                    {allFindings.length} findings
-                  </div>
-                  {allFindings.map((f) => (
-                    <div
-                      key={f.id}
-                      className={`p-3 rounded-lg border text-xs cursor-pointer hover:opacity-90 transition-opacity ${SEV_COLORS[f.severity] ?? SEV_COLORS.info}`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="uppercase font-bold text-[10px] opacity-80">{f.severity}</span>
-                        <span className="opacity-50">·</span>
-                        <span className="opacity-60 font-mono text-[10px]">{SCANNER_LABELS[f.scanner] ?? f.scanner}</span>
-                      </div>
-                      <div className="font-medium leading-snug mb-1">{f.title}</div>
-                      <div className="opacity-60 leading-relaxed line-clamp-2">{f.detail}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+            {/* Scrollable findings + AI */}
+            <div className="flex-1 overflow-y-auto relative z-20">
+              <FindingsList result={scanResult!} />
+              {scanResult!.aiExplanation && <AIPanel explanation={scanResult!.aiExplanation} />}
+            </div>
 
-              {/* AI Explanation */}
-              {scanResult.aiExplanation && (
-                <div className="p-3 border-t border-gray-800 mt-2">
-                  <div className="text-xs text-gray-500 font-mono uppercase tracking-widest mb-3">AI Analysis</div>
-                  <p className="text-gray-300 text-xs leading-relaxed mb-4">{scanResult.aiExplanation.summary}</p>
-                  {scanResult.aiExplanation.items.map((item, i) => (
-                    <div key={i} className="mb-4 bg-gray-900/60 rounded-lg p-3 border border-gray-800">
-                      <div className="text-red-400 font-medium text-xs mb-2">{item.title}</div>
-                      <div className="text-gray-400 text-xs mb-2"><span className="text-gray-500">Why dangerous: </span>{item.why_dangerous}</div>
-                      <div className="text-gray-400 text-xs mb-2"><span className="text-gray-500">Fix: </span>{item.exact_fix}</div>
-                      <div className="text-gray-500 text-xs italic">{item.real_example}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+            {/* Footer — repo URL, mono, dim */}
+            <div
+              className="px-5 py-2.5 shrink-0 flex items-center justify-between relative z-20"
+              style={{ borderTop: '1px solid var(--border)' }}
+            >
+              <span className="font-mono text-[9px]" style={{ color: 'var(--muted)' }}>
+                {scanResult!.repoUrl.replace('https://github.com/', '')}
+              </span>
+              <div
+                className="w-1.5 h-1.5 rounded-full animate-threat-pulse"
+                style={{ background: 'var(--safe)', boxShadow: '0 0 4px rgba(34,197,94,0.6)' }}
+              />
             </div>
           </motion.aside>
         )}

@@ -10,20 +10,51 @@ import CommitTimeline from './CommitTimeline';
 import DockerLayers from './DockerLayers';
 import ApiSpokes from './ApiSpokes';
 import AttackPaths from './AttackPaths';
+import GroundGrid from './GroundGrid';
 
 export default function SpectreScene() {
   const { scanResult } = useScanStore();
 
+  const hasCritical = (scanResult?.threatScore ?? 0) > 70;
+  const hasFindings = (scanResult?.threatScore ?? 0) > 0;
+
   return (
     <Canvas
-      camera={{ position: [0, 40, 280], fov: 60 }}
+      camera={{ position: [0, 55, 270], fov: 52 }}
       style={{ background: '#030712', width: '100%', height: '100vh' }}
       dpr={[1, 2]}
     >
-      <ambientLight intensity={0.05} />
-      <pointLight position={[0, 0, 0]} intensity={2.5} color="#3b82f6" distance={250} decay={1} />
-      <pointLight position={[100, 100, 100]} intensity={0.4} color="#8b5cf6" />
+      {/* Lighting — DELIBERATE, not defaults */}
+      <ambientLight intensity={0.04} color="#0a1428" />
+
+      {/* Core blue light — always on, anchors the scene */}
+      <pointLight
+        position={[0, 0, 0]}
+        intensity={2.8}
+        color="#1e3a5f"
+        distance={280}
+      />
+
+      {/* Fill light — subtle purple from above */}
+      <pointLight position={[0, 180, 60]} intensity={0.6} color="#0d1a40" />
+
+      {/* Threat light — red, only when critical findings exist */}
+      {hasCritical && (
+        <pointLight
+          position={[90, 30, 90]}
+          intensity={2.0}
+          color="#ef4444"
+          distance={220}
+        />
+      )}
+
+      {/* Rim light — slight blue from behind */}
+      <pointLight position={[0, -80, -200]} intensity={0.3} color="#2563eb" />
+
       <Stars radius={400} depth={60} count={4000} factor={4} saturation={0} fade speed={0.5} />
+
+      {/* Ground Grid added here */}
+      <GroundGrid />
 
       <Suspense fallback={null}>
         <RepoNode />

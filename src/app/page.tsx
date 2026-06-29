@@ -1,6 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScanStore } from '@/store/scanStore';
@@ -8,11 +8,17 @@ import type { ScanResult } from '@/types';
 
 const SpectreScene = dynamic(() => import('@/components/Scene/SpectreScene'), { ssr: false });
 
+const DEMOS = [
+  { id: 'event-stream', label: 'event-stream attack', year: '2018' },
+  { id: 'node-ipc',     label: 'node-ipc protest',    year: '2022' },
+];
+
 export default function Home() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
   const { setScanResult, startPolling, setLoading: setStoreLoading } = useScanStore();
 
   const startScan = useCallback(async (repoUrl: string) => {
@@ -72,23 +78,68 @@ export default function Home() {
             The ghosts in your codebase. Made visible.
           </p>
 
-          {/* Input */}
-          <div className="flex gap-2 mb-4">
+          {/* Stats row */}
+          <div className="flex gap-8 mb-8 justify-center">
+            {[
+              { value: '742%', label: 'supply chain attacks up', sub: '2022 → 2024' },
+              { value: '8M+',  label: 'devs hit by event-stream', sub: 'Nov 2018' },
+              { value: '10B',  label: 'estimated log4shell damage', sub: 'USD' },
+            ].map(s => (
+              <div key={s.value} className="text-center">
+                <div
+                  className="font-display font-bold leading-none mb-0.5"
+                  style={{ fontSize: 28, color: '#ef4444', letterSpacing: '-0.03em' }}
+                >
+                  {s.value}
+                </div>
+                <div className="font-mono text-[9px]" style={{ color: 'var(--muted)' }}>
+                  {s.label}
+                </div>
+                <div className="font-mono text-[8px]" style={{ color: 'var(--border-hi)' }}>
+                  {s.sub}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* URL Input */}
+          <div className="relative w-full mb-4">
+            {/* Corner brackets — HUD detail */}
+            <div className="absolute top-0 left-0 w-3 h-3 pointer-events-none"
+              style={{ borderTop: '1px solid var(--accent)', borderLeft: '1px solid var(--accent)' }} />
+            <div className="absolute bottom-0 right-[100px] w-3 h-3 pointer-events-none"
+              style={{ borderBottom: '1px solid var(--accent)', borderRight: '1px solid var(--accent)' }} />
+
             <input
+              ref={inputRef}
               type="text"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={e => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && url && startScan(url)}
               placeholder="https://github.com/owner/repo"
               disabled={loading}
-              className="flex-1 bg-gray-900/80 border border-blue-500/40 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/50 text-sm backdrop-blur-sm transition-all"
+              className="w-full px-4 py-3.5 rounded-sm outline-none transition-all duration-200 font-mono text-sm disabled:opacity-50"
+              style={{
+                background: 'rgba(8,13,24,0.9)',
+                border: '1px solid var(--border-hi)',
+                color: 'var(--specter)',
+                caretColor: 'var(--accent)',
+              }}
+              onFocus={e => e.currentTarget.style.borderColor = 'var(--accent)'}
+              onBlur={e => e.currentTarget.style.borderColor = 'var(--border-hi)'}
             />
+
             <button
               onClick={() => url && startScan(url)}
-              disabled={loading || !url}
-              className="bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-lg transition-colors text-sm whitespace-nowrap"
+              disabled={loading || !url.trim()}
+              className="absolute right-0 top-0 bottom-0 px-5 rounded-r-sm font-mono text-[11px] font-bold tracking-widest uppercase transition-all duration-200"
+              style={{
+                background: loading || !url.trim() ? 'var(--surface)' : 'var(--accent)',
+                color: loading || !url.trim() ? 'var(--muted)' : 'white',
+                borderLeft: '1px solid var(--border-hi)',
+              }}
             >
-              {loading ? 'Scanning...' : 'Scan Repo'}
+              {loading ? '...' : 'SCAN →'}
             </button>
           </div>
 
@@ -105,25 +156,45 @@ export default function Home() {
           </AnimatePresence>
 
           {/* Demo buttons */}
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={() => loadDemo('event-stream.json')}
-              disabled={loading}
-              className="bg-red-900/50 hover:bg-red-800/60 border border-red-500/30 hover:border-red-400/50 text-red-300 text-xs font-medium px-4 py-2.5 rounded-lg transition-all backdrop-blur-sm"
-            >
-              ⚡ Demo: event-stream attack (2018)
-            </button>
-            <button
-              onClick={() => loadDemo('node-ipc.json')}
-              disabled={loading}
-              className="bg-orange-900/50 hover:bg-orange-800/60 border border-orange-500/30 hover:border-orange-400/50 text-orange-300 text-xs font-medium px-4 py-2.5 rounded-lg transition-all backdrop-blur-sm"
-            >
-              ⚡ Demo: node-ipc protestware (2022)
-            </button>
+          <div className="flex gap-2.5 w-full mb-8 mt-2">
+            {DEMOS.map(d => (
+              <button
+                key={d.id}
+                onClick={() => loadDemo(`${d.id}.json`)}
+                disabled={loading}
+                className="group relative flex-1 py-3 px-3 rounded overflow-hidden transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                }}
+                onMouseEnter={e => !loading && (e.currentTarget.style.borderColor = 'rgba(239,68,68,0.4)')}
+                onMouseLeave={e => !loading && (e.currentTarget.style.borderColor = 'var(--border)')}
+              >
+                {/* Year badge */}
+                <span
+                  className="block font-mono text-[8px] tracking-[0.2em] uppercase mb-1"
+                  style={{ color: '#ef4444' }}
+                >
+                  {d.year} · CONFIRMED ATTACK
+                </span>
+                {/* Label */}
+                <span
+                  className="block font-mono text-[11px] transition-colors duration-200"
+                  style={{ color: 'var(--ink)' }}
+                >
+                  {d.label}
+                </span>
+                {/* Hover line */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-px transition-all duration-300"
+                  style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.6), transparent)' }}
+                />
+              </button>
+            ))}
           </div>
 
           {/* Scanner badges */}
-          <div className="flex gap-2 justify-center mt-8 flex-wrap">
+          <div className="flex gap-2 justify-center flex-wrap">
             {['DepChain','GhostCommit','LayerScan','APIBleed','EnvTrace'].map((s) => (
               <span key={s} className="text-xs text-gray-500 border border-gray-700 rounded px-2 py-1">
                 {s}

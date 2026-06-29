@@ -49,6 +49,27 @@ export default function RepoNode() {
         />
       </Sphere>
 
+      {/* Second wireframe shell at different radius — adds depth */}
+      <Sphere args={[22, 8, 8]}>
+        <meshStandardMaterial
+          color={color}
+          transparent
+          opacity={0.03}
+          wireframe
+        />
+      </Sphere>
+
+      {/* Outer atmosphere — a slightly larger, barely-visible sphere */}
+      <Sphere args={[18, 32, 32]}>
+        <meshStandardMaterial
+          color={color}
+          transparent
+          opacity={0.04}
+          roughness={1}
+          metalness={0}
+        />
+      </Sphere>
+
       {/* Equatorial ring */}
       <Ring ref={ringRef} args={[17, 19, 64]}>
         <meshStandardMaterial
