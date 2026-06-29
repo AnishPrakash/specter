@@ -87,16 +87,45 @@ async function queryOSV(packages: { name: string; version: string }[]): Promise<
       });
       const data = await res.json();
       (data.results ?? []).forEach(
-        (result: { vulns?: { id: string; severity?: { score: number }[]; summary?: string; affected?: { ranges?: { events?: { fixed?: string }[] }[] }[] }[] }, idx: number) => {
+        (result: { vulns?: any[] }, idx: number) => {
           const pkg = batch[idx];
           const cves: CVE[] = (result.vulns ?? []).map((v) => {
-            const score = v.severity?.[0]?.score ?? 5.0;
+            // OSV returns severity as an array of objects with type and score
+            // CVSS score can be nested under severity[].score (numeric)
+            // or as a string in database_specific or ecosystem_specific
+            let score = 5.0;
+            if (v.severity?.length > 0) {
+              // Try numeric score first
+              const numericSev = v.severity.find((s: any) => typeof s.score === 'number');
+              if (numericSev) {
+                score = numericSev.score;
+              } else {
+                // CVSS string score — parse the base score from the vector
+                const stringSev = v.severity.find((s: any) => typeof s.score === 'string');
+                if (stringSev?.score) {
+                  const match = stringSev.score.match(/\/(\d+\.\d+)$/);
+                  if (match) score = parseFloat(match[1]);
+                }
+              }
+            }
+            // database_specific fallback
+            if (score === 5.0 && v.database_specific?.severity) {
+              const dbSev = v.database_specific.severity.toLowerCase();
+              score = dbSev === 'critical' ? 9.5 : dbSev === 'high' ? 7.5 : dbSev === 'moderate' ? 5.0 : 2.0;
+            }
+
+            // Summary fallback chain
+            const summary =
+              (v.summary && v.summary.trim()) ||
+              (v.details && v.details.trim().split('\n')[0].substring(0, 120)) ||
+              v.id;
+
             return {
               id: v.id,
               severity: severityFromScore(score),
               score,
-              summary: v.summary ?? 'No description available',
-              fixed_in: v.affected?.[0]?.ranges?.[0]?.events?.find((e) => e.fixed)?.fixed,
+              summary,
+              fixed_in: v.affected?.[0]?.ranges?.[0]?.events?.find((e: any) => e.fixed)?.fixed,
             };
           });
           if (cves.length > 0) cveMap.set(`${pkg.name}@${pkg.version}`, cves);
