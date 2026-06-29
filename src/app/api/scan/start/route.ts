@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Create scan record
-  const { data: scan } = await supabaseAdmin
+  const { data: scan, error } = await supabaseAdmin
     .from('scans')
     .insert({ repo_url: repoUrl, repo_owner: owner, repo_name: repo, status: 'scanning' })
     .select()
