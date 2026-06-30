@@ -25,13 +25,23 @@ const SECRET_RE = /password|secret|key|token|credential|auth|pwd|apikey/i;
 
 export async function runLayerScan(owner: string, repo: string) {
   const candidates = ['Dockerfile', 'dockerfile', 'Dockerfile.prod', 'docker/Dockerfile', 'deploy/Dockerfile'];
-  let content: string | null = null;
-  let baseImage = 'No Dockerfile found';
 
-  for (const c of candidates) {
-    content = await getFileContent(owner, repo, c);
-    if (content) break;
+  // Check all candidate paths in parallel instead of sequentially.
+  // Sequential awaits meant repos with no Dockerfile (e.g. Rust projects)
+  // paid the full latency of 5 separate 404s back-to-back.
+  const results = await Promise.allSettled(
+    candidates.map((c) => getFileContent(owner, repo, c))
+  );
+
+  let content: string | null = null;
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value) {
+      content = r.value;
+      break;
+    }
   }
+
+  let baseImage = 'No Dockerfile found';
 
   if (!content) return { findings: [], baseImage };
 
