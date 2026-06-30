@@ -84,4 +84,4 @@ npm run dev
 
 ## 🛡 Security Philosophy
 
-Specter follows a "Cold Industrial Intelligence" design. We believe that security data is high-density and high-impact; it should not be hidden behind rounded corners, excessive gradients, or generic SaaS aesthetics. By prioritizing spatial data, mono-spacing, and immediate visual hierarchy, Specter provides security teams with the clarity required to stop supply chain attacks before they materialize.
+Specter follows a "Cold Industrial Intelligence" design. We believe that security data is high-density and high-impact; it should not be hidden behind rounded corners, excessive gradients, or generic SaaS aesthetics. By prioritizing spatial data, mono-spacing, and immediate visual hierarchy, Specter provides security teams with the clarity required to stop supply chain attacks before they materialise.
