@@ -22,11 +22,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: e.message }, { status: 400 });
   }
 
+  // Normalize the URL to lowercase to prevent case-sensitive cache misses
+  const normalizedUrl = `https://github.com/${owner}/${repo}`.toLowerCase();
+
   // Check cache first (6-hour TTL)
   const { data: cached } = await supabaseAdmin
     .from('scan_cache')
     .select('*')
-    .eq('repo_url', repoUrl)
+    .eq('repo_url', normalizedUrl)
     .gt('expires_at', new Date().toISOString())
     .single();
 
@@ -34,7 +37,7 @@ export async function POST(req: NextRequest) {
     const { data: existingScan } = await supabaseAdmin
       .from('scans')
       .insert({
-        repo_url: repoUrl,
+        repo_url: normalizedUrl,
         repo_owner: owner,
         repo_name: repo,
         status: 'completed',
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
   // Create scan record
   const { data: scan, error } = await supabaseAdmin
     .from('scans')
-    .insert({ repo_url: repoUrl, repo_owner: owner, repo_name: repo, status: 'scanning' })
+    .insert({ repo_url: normalizedUrl, repo_owner: owner, repo_name: repo, status: 'scanning' })
     .select()
     .single();
 
