@@ -26,6 +26,27 @@ const PATTERNS: { name: string; regex: RegExp }[] = [
 
 const SKIP_EXT = ['.png','.jpg','.jpeg','.gif','.svg','.ico','.woff','.ttf','.eot','.mp4','.zip','.lock','.sum'];
 
+// Lockfiles and generated files are full of base64 hashes and integrity
+// strings that look like high-entropy secrets but are not — every real
+// secret scanner (Gitleaks, TruffleHog) excludes these by default.
+const SKIP_FILES = [
+  'package-lock.json',
+  'yarn.lock',
+  'pnpm-lock.yaml',
+  'composer.lock',
+  'Gemfile.lock',
+  'Cargo.lock',
+  'poetry.lock',
+  'go.sum',
+];
+
+function shouldSkipFile(filename: string): boolean {
+  if (SKIP_EXT.some((ext) => filename.endsWith(ext))) return true;
+  const basename = filename.split('/').pop() ?? filename;
+  if (SKIP_FILES.includes(basename)) return true;
+  return false;
+}
+
 function scanLine(
   line: string,
   lineNum: number,
@@ -88,7 +109,7 @@ export async function runGhostCommit(owner: string, repo: string) {
       const detail = await octokit.repos.getCommit({ owner, repo, ref: commit.sha });
       for (const file of detail.data.files ?? []) {
         if (!file.patch) continue;
-        if (SKIP_EXT.some((ext) => file.filename.endsWith(ext))) continue;
+        if (shouldSkipFile(file.filename)) continue;
         if (file.filename.includes('node_modules') || file.filename.includes('.min.')) continue;
 
         const lines = file.patch.split('\n');
