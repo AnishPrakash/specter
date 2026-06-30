@@ -57,12 +57,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error?.message ?? 'Failed to create scan' }, { status: 500 });
   }
 
-  // Trigger the run route — don't await, use waitUntil pattern via headers
+  // Trigger the run route — AWAITED with a short timeout.
+  // This guarantees the request actually leaves before this function
+  // terminates. We don't wait for the full scan, just for /run to
+  // accept the trigger (it runs the real work independently afterward).
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://specter-seven.vercel.app';
-  fetch(`${appUrl}/api/scan/${scan.id}/run`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-internal-secret': process.env.INTERNAL_SECRET ?? 'specter-internal' },
-  }).catch(() => {}); // intentional — we don't await this
+  try {
+    await fetch(`${appUrl}/api/scan/${scan.id}/run`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.INTERNAL_SECRET ?? 'specter-internal',
+      },
+      signal: AbortSignal.timeout(3000),
+    });
+  } catch (err) {
+    console.error('Failed to trigger run route:', err);
+    // Don't fail the whole request — the scan row exists, the frontend
+    // can still poll it. But this log line is how we'll catch this
+    // happening again in Vercel logs.
+  }
 
   return NextResponse.json({ scanId: scan.id });
 }
