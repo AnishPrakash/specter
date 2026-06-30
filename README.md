@@ -2,7 +2,9 @@
 
 **"The ghosts in your codebase. Made visible."**
 
-> **[Live Demo: specter-seven.vercel.app](https://specter-seven.vercel.app/)**
+**[Live Demo: specter-seven.vercel.app](https://specter-seven.vercel.app/)** | 
+**[YouTube Video Demo](https://youtu.be/yFcc3rzBGe4)** | 
+**[Project Presentation (PPT)](https://docs.google.com/presentation/d/1akkN0q_k67gA_h6EymnjD1QTG1c0lWJw/edit?usp=sharing&ouid=100969165397374107651&rtpof=true&sd=true)**
 
 Specter is not another static security dashboard. It is an immersive, 3D threat intelligence platform that maps your repository's attack surface in real-time. By visualizing dependency trees, commit history, and runtime environments as spatial nodes, Specter reveals the "ghosts"—malicious code, secrets, and insecure configurations—that standard scanners miss.
 
@@ -44,22 +46,23 @@ Specter is built with a high-performance stack designed for real-time telemetry:
 ## 🚀 Setup & Installation
 
 1. **Clone the repository:**
+
 ```bash
 git clone https://github.com/AnishPrakash/specter.git
 cd specter
 
 ```
 
-
 2. **Install dependencies:**
+
 ```bash
 npm install
 
 ```
 
-
 3. **Configure Environment Variables:**
 Create a `.env.local` file at the root:
+
 ```env
 GITHUB_TOKEN=your_github_token
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -70,14 +73,12 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ```
 
-
 4. **Launch the System:**
+
 ```bash
 npm run dev
 
 ```
-
-
 
 ---
 
